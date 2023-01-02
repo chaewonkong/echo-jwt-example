@@ -7,6 +7,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type jwtCustomClaims struct {
@@ -14,13 +16,29 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func login(c echo.Context) error {
+type User struct {
+	gorm.Model
+	Username string
+	Password string
+}
+
+type handler struct {
+	db *gorm.DB
+}
+
+func (h handler) login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
 	if username == "" || password == "" {
 		return echo.ErrUnauthorized
 	}
+
+	// save user
+	h.db.Create(&User{
+		Username: username,
+		Password: password,
+	})
 
 	claims := &jwtCustomClaims{
 		username,
@@ -41,17 +59,33 @@ func login(c echo.Context) error {
 	})
 }
 
-func restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*jwtCustomClaims)
+func (h handler) restricted(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(*jwtCustomClaims)
 	name := claims.Name
 
-	return c.String(http.StatusOK, "Welcome "+name+"!")
+	var user User
+	h.db.First(&user, "username = ?", name)
+
+	return c.String(http.StatusOK, "Welcome "+user.Username+"!")
 }
 
 func main() {
+	// gorm
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database!~!")
+	}
+
+	// create table
+	db.AutoMigrate(&User{})
+
 	e := echo.New()
-	e.POST("/login", login)
+	h := handler{
+		db,
+	}
+
+	e.POST("/login", h.login)
 
 	restrictedRoute := e.Group("/auth")
 
@@ -63,7 +97,7 @@ func main() {
 	}
 
 	restrictedRoute.Use(echojwt.WithConfig(config))
-	restrictedRoute.GET("", restricted)
+	restrictedRoute.GET("", h.restricted)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
