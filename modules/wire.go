@@ -4,11 +4,12 @@
 package modules
 
 import (
+	"go-jwt/app"
+
 	"github.com/google/wire"
-	"github.com/labstack/echo/v4"
 )
 
-func InitializeServer() Server {
-	wire.Build(NewRepository, NewHandler, echo.New, NewServer)
-	return Server{}
+func InitializeServer() app.Server {
+	wire.Build(app.AppSet)
+	return app.Server{}
 }

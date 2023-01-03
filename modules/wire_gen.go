@@ -8,14 +8,15 @@ package modules
 
 import (
 	"github.com/labstack/echo/v4"
+	"go-jwt/app"
 )
 
 // Injectors from wire.go:
 
-func InitializeServer() Server {
-	repository := NewRepository()
-	handler := NewHandler(repository)
+func InitializeServer() app.Server {
+	repository := app.NewRepository()
+	handler := app.NewHandler(repository)
 	echoEcho := echo.New()
-	server := NewServer(handler, echoEcho)
+	server := app.NewServer(handler, echoEcho)
 	return server
 }
