@@ -52,7 +52,18 @@ func (h Handler) login(c echo.Context) error {
 	})
 }
 
-func (h Handler) restricted(c echo.Context) error {
+func (h Handler) findAllUser(c echo.Context) error {
+
+	users, err := h.repository.findAllUser()
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+func (h Handler) findUser(c echo.Context) error {
 	userToken := c.Get("user").(*jwt.Token)
 	claims := userToken.Claims.(*JwtCustomClaims)
 	name := claims.Name

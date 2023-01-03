@@ -5,12 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
-	gorm.Model
-	Username string
-	Password string
-}
-
 type Repository struct {
 	db *gorm.DB
 }
@@ -42,4 +36,11 @@ func (r Repository) findUser(username string) (User, error) {
 	res := r.db.First(&user, "username = ?", username)
 
 	return user, res.Error
+}
+
+func (r Repository) findAllUser() ([]User, error) {
+	var users []User
+
+	res := r.db.Find(&users)
+	return users, res.Error
 }

@@ -36,5 +36,6 @@ func (s Server) bindRoute() {
 		SigningKey:    []byte("secret"),
 	}
 	r.Use(echojwt.WithConfig(config))
-	r.GET("", s.handler.restricted)
+	r.GET("", s.handler.findAllUser)
+	r.GET("/user", s.handler.findUser)
 }
