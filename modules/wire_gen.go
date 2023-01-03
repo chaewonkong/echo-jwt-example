@@ -13,10 +13,10 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeServer() app.Server {
+func InitializeServer() (app.Server, error) {
 	repository := app.NewRepository()
 	handler := app.NewHandler(repository)
 	echoEcho := echo.New()
 	server := app.NewServer(handler, echoEcho)
-	return server
+	return server, nil
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/google/wire"
 )
 
-func InitializeServer() app.Server {
+func InitializeServer() (app.Server, error) {
 	wire.Build(AppModules)
-	return app.Server{}
+	return app.Server{}, nil
 }

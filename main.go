@@ -5,6 +5,9 @@ import (
 )
 
 func main() {
-	server := modules.InitializeServer()
+	server, err := modules.InitializeServer()
+	if err != nil {
+		panic(err)
+	}
 	server.Start()
 }
