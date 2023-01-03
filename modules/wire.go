@@ -10,6 +10,6 @@ import (
 )
 
 func InitializeServer() app.Server {
-	wire.Build(app.AppSet)
+	wire.Build(AppModules)
 	return app.Server{}
 }
